@@ -21,5 +21,7 @@ $('audio-upload').onchange=async e=>{const file=e.target.files[0];if(!file)retur
 $('stop-preview').onclick=()=>sound.stop();$('volume').oninput=e=>{const v=+e.target.value;$('volume-value').textContent=v+'%';try{sound.setVolume(v/100);sound.stop()}catch(err){status('Could not save volume: '+err.message)}};
 window.addEventListener('pagehide',()=>{release();sound.stop()});document.addEventListener('visibilitychange',()=>{if(document.hidden){if(recording)stopRecording();sound.stop()}});
 sound.ready.then(()=>{render();$('volume').value=Math.round(sound.settings.volume*100);$('volume-value').textContent=$('volume').value+'%';recordingUI();status('Ready to make some noise!')}).catch(e=>{render();status('Audio library unavailable: '+e.message);$('record').disabled=true;$('audio-upload').disabled=true});
+// Another window changed sound choices (and maybe the library): show the current ones.
+document.addEventListener('folderchange',e=>{if(!e.detail?.keys?.includes('soundSettings'))return;sound.refresh().catch(()=>{}).then(()=>{render();$('volume').value=Math.round(sound.settings.volume*100);$('volume-value').textContent=$('volume').value+'%'})});
 
 window.InstrumentStudio?.({sound,status,onSaved:render});
