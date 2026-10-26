@@ -1,0 +1,16 @@
+# Local game saves, recordings, and uploaded drawings
+data/
+
+# Python caches and local tooling
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Local hosting registration
+.openai/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+*.swp
