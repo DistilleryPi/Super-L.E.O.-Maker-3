@@ -16,7 +16,7 @@ Updated 2026-10-25. Development computer: Linux Mint.
 
 - `ae42117` README only. `1f610cf` the full game, built with Codex (2026-10-25).
 - PR #1 (open, not merged): fixes three bugs from a code review on 2026-10-25. It also
-  adds this handoff and `AGENTS.md`.
+  adds this handoff, `AGENTS.md` and `CLAUDE.md`.
 
 ## Current save behaviour
 
@@ -47,8 +47,8 @@ branch. Not tested: Chrome, Safari, Windows, macOS, microphone and speaker hardw
 `BroadcastChannel` needs Safari 15.4 or newer; without it, pages still re-check on focus
 and stale saves are still refused.
 
-The user authorized committing, pushing the branch, opening PR #1 and adding these two
-files to it. Merging was not authorized.
+The user authorized committing, pushing the branch, opening PR #1 and adding `AGENTS.md`,
+`CLAUDE.md` and this handoff to it. Merging was not authorized.
 
 ## Open items from the 2026-10-25 review (not started)
 
@@ -90,3 +90,4 @@ Repository and sharing:
 
 - `README.md`: running, saving, sharing, features and test commands.
 - `AGENTS.md`: standing development and collaboration instructions.
+- `CLAUDE.md`: imports `AGENTS.md` so Claude Code loads the same instructions.
