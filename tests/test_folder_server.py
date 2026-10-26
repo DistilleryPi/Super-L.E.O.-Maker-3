@@ -85,6 +85,33 @@ class FolderServerTests(unittest.TestCase):
         _, _, script = self.request('/folder-bootstrap.js')
         self.assertIn(b'left untouched', script)
 
+    def test_stale_saves_are_refused(self):
+        world = {'format': 'elley-story', 'levels': [{'title': 'First'}]}
+        _, _, body = self.request('/api/state', {'world': world, 'base': {'world': 0}}, 'PUT')
+        self.assertEqual(json.loads(body)['revisions'], {'world': 1, 'soundSettings': 0})
+        newer = {'format': 'elley-story', 'levels': [{'title': 'Newer'}]}
+        self.request('/api/state', {'world': newer, 'base': {'world': 1}}, 'PUT')
+        # A second window still working from revision 1 must not replace revision 2.
+        with self.assertRaises(HTTPError) as error:
+            self.request('/api/state', {'world': world, 'base': {'world': 1}}, 'PUT')
+        self.assertEqual(error.exception.code, 409)
+        self.assertTrue(json.loads(error.exception.read())['conflict'])
+        self.assertEqual(json.loads((self.data / 'game.json').read_text())['world'], newer)
+        # Sound choices have their own revision, so a story save elsewhere does not block them.
+        self.request('/api/state', {'soundSettings': {'volume': .3, 'slots': {}}, 'base': {'soundSettings': 0}}, 'PUT')
+        _, _, body = self.request('/api/revisions')
+        self.assertEqual(json.loads(body), {'world': 2, 'soundSettings': 1})
+        _, _, script = self.request('/folder-bootstrap.js')
+        self.assertIn(b'"revisions": {"world": 2, "soundSettings": 1}', script)
+
+    def test_saves_from_before_revisions_still_load(self):
+        self.data.mkdir(exist_ok=True)
+        (self.data / 'game.json').write_text(json.dumps({'version': 1, 'world': None, 'soundSettings': {'volume': .5, 'slots': {}}, 'audio': []}))
+        _, _, body = self.request('/api/revisions')
+        self.assertEqual(json.loads(body), {'world': 0, 'soundSettings': 0})
+        self.request('/api/state', {'soundSettings': {'volume': .2, 'slots': {}}, 'base': {'soundSettings': 0}}, 'PUT')
+        self.assertEqual(json.loads((self.data / 'game.json').read_text())['revisions']['soundSettings'], 1)
+
 
 if __name__ == '__main__':
     unittest.main()

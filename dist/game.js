@@ -146,6 +146,9 @@ if(story){try{const w=story.load(level),params=new URLSearchParams(location.sear
 else{try{const saved=localStorage.getItem('jumpWorkshop');if(saved){const l=JSON.parse(saved);if(l.version===1&&l.tiles?.length===H)setLevel(l)}}catch{}}
 requestAnimationFrame(frame);
 
+// Another window saved the story (for example, renamed this level). Show it, unless this page has unsaved edits.
+document.addEventListener('storychange',()=>{if(!story||!chapterId||playing||dirty)return;try{const w=story.get();level=story.chapter(chapterId).level;$('title').value=level.title;$('chapter-label').textContent='CHAPTER '+(w.levels.findIndex(c=>c.id===chapterId)+1)+' · '+w.title}catch{message('This chapter was removed in another window. Open World Maker to choose another.')}});
+
 document.addEventListener('visibilitychange',()=>{if(document.hidden){keys={};sound?.stop()}else if(playing&&!dead&&!won){sound?.unlock();sound?.music()}});
 
 window.addEventListener('pagehide',()=>{flushChapter();try{sessionStorage.setItem('jumpWorkshopDraft',JSON.stringify(level))}catch{}sound?.stop()});

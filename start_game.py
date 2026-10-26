@@ -16,6 +16,13 @@ LOCK = threading.RLock()
 MAX_STATE = 4 * 1024 * 1024
 MAX_AUDIO = 20 * 1024 * 1024
 SAFE_ID = re.compile(r'[A-Za-z0-9_-]{1,100}\Z')
+# Parts of game.json that pages save. Each has a revision number so a page
+# working from an older copy (another tab or browser) cannot overwrite newer work.
+STATE_KEYS = ('world', 'soundSettings')
+
+
+class SaveConflict(Exception):
+    pass
 
 
 def atomic_write(path, data):
@@ -43,11 +50,18 @@ class GameServer(ThreadingHTTPServer):
 
     def read_state(self):
         if not self.state_file.exists():
-            return {'version': 1, 'world': None, 'soundSettings': None, 'audio': []}
+            return {'version': 1, 'world': None, 'soundSettings': None, 'audio': [], 'revisions': {}}
         state = json.loads(self.state_file.read_text('utf-8'))
         if not isinstance(state, dict) or state.get('version') != 1:
             raise ValueError('The game save needs repair; it has not been overwritten.')
+        if not isinstance(state.get('revisions'), dict):
+            state['revisions'] = {}
         return state
+
+    @staticmethod
+    def revisions(state):
+        saved = state.get('revisions', {})
+        return {key: saved[key] if type(saved.get(key)) is int else 0 for key in STATE_KEYS}
 
     def save_state(self, state):
         data = json.dumps(state, ensure_ascii=False).encode('utf-8')
@@ -109,7 +123,7 @@ class Handler(SimpleHTTPRequestHandler):
                 with LOCK:
                     state = self.server.read_state()
                 # Stored as an external script; no HTML interpolation.
-                data = ('window.FolderBootstrap=' + json.dumps({'enabled': True, 'world': state.get('world'), 'soundSettings': state.get('soundSettings')}, ensure_ascii=True) + ';').encode()
+                data = ('window.FolderBootstrap=' + json.dumps({'enabled': True, 'world': state.get('world'), 'soundSettings': state.get('soundSettings'), 'revisions': self.server.revisions(state)}, ensure_ascii=True) + ';').encode()
                 return self.reply(200, data, 'text/javascript; charset=utf-8')
             except Exception:
                 return self.reply(200, b'window.FolderBootstrap={enabled:false,error:"The game-folder save could not be read. Original files were left untouched."};', 'text/javascript; charset=utf-8')
@@ -121,6 +135,8 @@ class Handler(SimpleHTTPRequestHandler):
                     state = self.server.read_state()
                     if path == '/api/state':
                         return self.reply(200, state)
+                    if path == '/api/revisions':
+                        return self.reply(200, self.server.revisions(state))
                     if path == '/api/audio':
                         return self.reply(200, state.get('audio', []))
                     key = path.removeprefix('/api/audio/')
@@ -137,12 +153,19 @@ class Handler(SimpleHTTPRequestHandler):
         if not self.allowed(write=True):
             return
         path = unquote(urlsplit(self.path).path)
+        result = {'saved': True}
         try:
             with LOCK:
                 state = self.server.read_state()
                 if path == '/api/state':
                     patch = json.loads(self.body(MAX_STATE))
-                    if not isinstance(patch, dict) or not patch or set(patch) - {'world', 'soundSettings'}:
+                    if not isinstance(patch, dict):
+                        raise ValueError('Invalid game save.')
+                    # "base" lists the revision each part was edited from.
+                    base = patch.pop('base', None)
+                    if not patch or set(patch) - set(STATE_KEYS):
+                        raise ValueError('Invalid game save.')
+                    if base is not None and (not isinstance(base, dict) or any(type(v) is not int for v in base.values())):
                         raise ValueError('Invalid game save.')
                     if 'world' in patch:
                         w = patch['world']
@@ -150,7 +173,14 @@ class Handler(SimpleHTTPRequestHandler):
                             raise ValueError('Invalid story save.')
                     if 'soundSettings' in patch and not isinstance(patch['soundSettings'], dict):
                         raise ValueError('Invalid sound settings.')
+                    current = self.server.revisions(state)
+                    if base is not None and any(key in base and base[key] != current[key] for key in patch):
+                        raise SaveConflict('Your story was changed in another window. Reload this page to see the newest version; your last change here was not saved.')
                     state.update(patch)
+                    for key in patch:
+                        current[key] += 1
+                    state['revisions'] = current
+                    result['revisions'] = current
                 elif path.startswith('/api/audio/'):
                     key = path.removeprefix('/api/audio/')
                     if not SAFE_ID.fullmatch(key):
@@ -167,7 +197,9 @@ class Handler(SimpleHTTPRequestHandler):
                 else:
                     return self.reply(404, {'error': 'Not found.'})
                 self.server.save_state(state)
-            return self.reply(200, {'saved': True})
+            return self.reply(200, result)
+        except SaveConflict as error:
+            return self.reply(409, {'error': str(error), 'conflict': True})
         except (ValueError, json.JSONDecodeError) as error:
             return self.reply(400, {'error': str(error)})
         except Exception as error:

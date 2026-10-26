@@ -5,6 +5,8 @@ window.GameSound=(()=>{
  const events={music:'Background music',jump:'Jump',bump:'Brick bump',break:'Brick smash',pickup:'Treat / coin',grow:'Milk / grow',hurt:'Shrink',stomp:'Enemy stomp',win:'Course complete',death:'Game over'};
  let onError=()=>{},db,clips=[],settings={volume:.65,slots:{}},context,musicAudio,musicTimer,notes=0,active=new Set();
  function config(){try{const s=folder?.read('soundSettings')||JSON.parse(localStorage.getItem('jumpWorkshopSound')||'{}');settings={volume:typeof s.volume==='number'?Math.max(0,Math.min(1,s.volume)):.65,slots:s.slots||{}}}catch{settings={volume:.65,slots:{}}}}
+ // Another window saved sound choices: use them here too.
+ if(typeof document!=='undefined')document.addEventListener('folderchange',e=>{if(e.detail?.keys?.includes('soundSettings'))config()});
  config();
  const browserReady=new Promise((resolve,reject)=>{if(!window.indexedDB){reject(Error('This browser cannot store audio. Try serving the game on localhost.'));return}const r=indexedDB.open('jumpWorkshopAudio',1);r.onupgradeneeded=()=>r.result.createObjectStore('clips',{keyPath:'id'});r.onsuccess=()=>{db=r.result;refreshBrowser().then(resolve,reject)};r.onerror=()=>reject(r.error)});
  const ready=browserReady.catch(e=>{if(folder)return [];throw e}).then(async legacy=>{if(!folder)return legacy;const disk=await folder.audio.list();if(!disk.length&&legacy.length){for(const clip of legacy)await folder.audio.put(clip.id,clip.name,clip.blob)}if(!folder.read('soundSettings'))folder.write('soundSettings',settings);return refresh()});
