@@ -65,6 +65,16 @@ function pinkCastle(){
  ctx.save();ctx.textAlign='center';ctx.fillStyle='#754257';ctx.font='bold 9px system-ui';ctx.fillText('HOME',cx,top+57);ctx.restore();
 }
 
+// Spikes hurt only where the triangle is drawn (base 2..30 at y 31, point at 16,5), shrunk by a few
+// pixels so a near miss counts as a miss. The empty corners of the 32 x 32 square are safe.
+function touchesSpike(p,tx,ty){
+ const grace=3,point=5+grace,base=31,halfBase=14-grace,left=p.x-tx*T,right=left+p.w,top=p.y-ty*T,feet=top+p.h;
+ if(feet<=point||top>=base)return false;
+ // The triangle is widest at the bottom, so check its width at the lowest part of the player inside it.
+ const reach=halfBase*(Math.min(feet,base)-point)/(base-point);
+ return left<16+reach&&right>16-reach;
+}
+
 function tryGrow(){
  if(!player.pendingMilk||!player.small)return;
  const grown={...player,y:player.y+player.h-48,h:48};
@@ -110,7 +120,7 @@ for(const item of pickups){
   item.collected=true;
  }
 }pickups=pickups.filter(item=>!item.collected&&item.y<H*T+80);
-if(p.y>H*T+80){die();return}for(const k of coins){const [x,y]=k.split(',').map(Number);if(overlap(p,{x:x*T+7,y:y*T+5,w:18,h:24})){coins.delete(k);p.score++;sound?.effect('pickup')}}for(let y=Math.max(0,Math.floor(p.y/T));y<Math.min(H,Math.ceil((p.y+p.h)/T));y++)for(let x=Math.max(0,Math.floor(p.x/T));x<Math.min(W,Math.ceil((p.x+p.w)/T));x++)if(level.tiles[y][x]==='spike'&&p.shield===0){die();return}for(const e of enemies){if(e.dead)continue;let nx=e.x+e.v;if(solid(Math.floor((nx+(e.v>0?25:0))/T),Math.floor((e.y+10)/T))||!solid(Math.floor((nx+(e.v>0?25:0))/T),Math.floor((e.y+25)/T)))e.v*=-1;e.x+=e.v;if(overlap(p,{x:e.x,y:e.y,w:26,h:24})){if(p.shield>0){e.dead=true}else if(p.vy>0&&p.y+p.h<e.y+14){e.dead=true;p.vy=-8;sound?.effect('stomp')}else if(p.hurt===0){if(!p.small)shrink();else{die();return}}}}if(overlap(p,castleDoor())){won=true;sound?.stopMusic();sound?.effect('win');message('Welcome home, Elley-Oh! 🎉');finishChapter()}cam=Math.max(0,Math.min(W*T-canvas.width,p.x-300));$('camera').value=cam/T}
+if(p.y>H*T+80){die();return}for(const k of coins){const [x,y]=k.split(',').map(Number);if(overlap(p,{x:x*T+7,y:y*T+5,w:18,h:24})){coins.delete(k);p.score++;sound?.effect('pickup')}}for(let y=Math.max(0,Math.floor(p.y/T));y<Math.min(H,Math.ceil((p.y+p.h)/T));y++)for(let x=Math.max(0,Math.floor(p.x/T));x<Math.min(W,Math.ceil((p.x+p.w)/T));x++)if(level.tiles[y][x]==='spike'&&p.shield===0&&touchesSpike(p,x,y)){die();return}for(const e of enemies){if(e.dead)continue;let nx=e.x+e.v;if(solid(Math.floor((nx+(e.v>0?25:0))/T),Math.floor((e.y+10)/T))||!solid(Math.floor((nx+(e.v>0?25:0))/T),Math.floor((e.y+25)/T)))e.v*=-1;e.x+=e.v;if(overlap(p,{x:e.x,y:e.y,w:26,h:24})){if(p.shield>0){e.dead=true}else if(p.vy>0&&p.y+p.h<e.y+14){e.dead=true;p.vy=-8;sound?.effect('stomp')}else if(p.hurt===0){if(!p.small)shrink();else{die();return}}}}if(overlap(p,castleDoor())){won=true;sound?.stopMusic();sound?.effect('win');message('Welcome home, Elley-Oh! 🎉');finishChapter()}cam=Math.max(0,Math.min(W*T-canvas.width,p.x-300));$('camera').value=cam/T}
 function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),w,h)}function character(x,y){
 // Red cap and brim, hair, face, nose, and a little plumber's moustache.
 rect(x+5,y,14,3,'#e53e35');rect(x+3,y+3,18,4,'#e53e35');rect(x+17,y+5,7,3,'#ba292b');

@@ -94,4 +94,19 @@ setLevel(blank());playing=true;reset();player.x=castleDoor().x;player.y=castleDo
 'Milk release, continuous movement, camera coordinates and castle finish checks passed';
 '''
 
+tests+='''
+// A spike is drawn as a triangle (base corners 2,31 and 30,31, point 16,5) inside its 32 x 32 square.
+// Only touching that triangle should end the run, not the empty corners of the square.
+function spikeCase(x,y){setLevel(blank());level.tiles[13][5]='spike';playing=true;keys={};reset();player.x=x;player.y=y;player.vy=-.5;step();return dead}
+const feetOnFloor=14*T-28;
+assert(!spikeCase(5*T-22+6,13*T+10-28),'brushing the empty corner beside the spike point is safe');
+assert(!spikeCase(5*T,13*T+4-28),'clearing the spike point is safe');
+assert(!spikeCase(5*T-22+4,feetOnFloor),'a near miss at the left of the spike base is safe');
+assert(!spikeCase(5*T+28,feetOnFloor),'a near miss at the right of the spike base is safe');
+assert(spikeCase(5*T-22+7,feetOnFloor),'walking into the spike from the left is game over');
+assert(spikeCase(5*T+26,feetOnFloor),'walking into the spike from the right is game over');
+assert(spikeCase(5*T+5,13*T+20-28),'landing on the spike is game over');
+'All gameplay checks passed, including spikes that hurt only where they are drawn';
+'''
+
 e=ctypes.c_void_p();s=j.JSStringCreateWithUTF8CString((stub+source+tests).encode());r=j.JSEvaluateScript(c,s,None,None,1,ctypes.byref(e));v=e.value or r;st=j.JSValueToStringCopy(c,v,None);buf=ctypes.create_string_buffer(4096);j.JSStringGetUTF8CString(st,buf,4096);print(buf.value.decode());raise SystemExit(1 if e.value else 0)
