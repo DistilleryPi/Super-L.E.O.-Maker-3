@@ -1,6 +1,6 @@
 # Super L.E.O. Maker 3 handoff
 
-Updated 2026-10-26. Development computer: Linux Mint.
+Updated 2026-10-27. Development computer: Linux Mint.
 
 ## Project and repository
 
@@ -18,7 +18,12 @@ Updated 2026-10-26. Development computer: Linux Mint.
   and World Maker fixes, plus `AGENTS.md`, `CLAUDE.md` and this handoff.
 - PR #2 merged 2026-10-25 as `9918ca2`: spikes hurt only where drawn. The merged branches
   `fix/two-tab-saves-map-restore` and `fix/spike-hitbox` still exist on GitHub.
-- Branch `feature/game-styles` (worktree `~/Projects/jump-workshop-styles`): four game styles.
+- PR #3, `feature/game-styles` (worktree `~/Projects/jump-workshop-styles`), is open and
+  not merged. It adds four game styles; its checked head was `823e2db`.
+- `feature/critters-and-powers` is a separate worktree at
+  `~/Projects/jump-workshop-powers`, branched from `feature/game-styles` at `823e2db`.
+  The user authorized committing and pushing this branch on 2026-10-27. Opening a PR
+  and merging are separate actions and have not been authorized.
 
 ## Current save behaviour
 
@@ -31,7 +36,112 @@ Updated 2026-10-26. Development computer: Linux Mint.
   or when shown again, which covers a second browser. A refused page shows a banner
   asking to reload.
 
-## Latest work: game styles (`feature/game-styles`)
+## Latest work: critters and powers (`feature/critters-and-powers`)
+
+Claude follow-up (2026-10-27, on top of Codex's work; Codex's diff was
+backed up first). From the user's play-testing:
+- The family's three chapters were still 60 tiles. **Make 12× longer** (was "Extend to 720
+  tiles") now fills the new columns with seeded obstacle sections (`addSections` in
+  `game.js`): gaps, block rows, pipes with snappers, stairs, turtles, floating platforms,
+  spikes and critter packs; fish only underwater. The last 24 columns stay clear.
+- The exit pipe is solid. Stand on it and press ↓/S (new ▼ touch button) to slide down.
+- Snappers centred on their pipe: `pipeUnder` pairs pipe columns from each run's left end
+  (it had used column parity), and `pipeHalf` in `styles.js` draws pipes the same way.
+- "Chapter 3 keeps repeating": after the final chapter the story had no way forward, and the
+  game reopened the last-played chapter. Defeating the Crumb Keeper now frees Princess Mom
+  (original art in all four styles): she walks out, thanks Elley-Oh! in a speech bubble with
+  hearts, then the finish sign offers **Start over at Chapter 1**, and the story's selected
+  chapter becomes chapter 1. A `mode=play` link is removed from the address after it starts,
+  so reloading no longer restarts the chapter.
+- Checks: all five suites and `git diff --check` pass; the new checks were confirmed to fail on
+  Codex's version. Headless Firefox (temporary data) screenshots of an extended course, snappers,
+  the exit-pipe arrow and slide, and the rescue in all four styles were reviewed; no page errors.
+  The family's saved chapters were not changed: they still need **Make 12× longer** clicked.
+  Codex reran all five required suites on 2026-10-27 before the authorized commit and push;
+  all passed. Chrome, Safari, Windows, macOS, real touch input, microphone and speaker
+  hardware, and a full hand-played 720-tile chapter remain untested.
+
+Earlier work on this branch adds a real pause menu (button or Esc/P)
+with Resume, Restart, Back to builder, World Maker and a Game era picker. The chapter
+introduction also has an era picker, so players can choose before each level. Changing
+the era while paused updates and saves that chapter's style; the new music begins on
+resume. Movement, timers and powers stop while paused.
+
+New and generated courses are 720 × 16 tiles (12 times the old width), with repeated
+obstacle sections. Existing 60-tile saves keep their layout. **Extend to 720 tiles**
+appends terrain, preserves existing blocks and moves the goal to the far end; Undo
+reverses it. The camera slider now covers each course's width, and the arrow buttons
+move 20 tiles per press. `validLevel` accepts uniform widths from 60 to 720. The local
+server save limit is 16 MB and full-story JSON restore limit is 32 MB so many long
+chapters can be saved. An older copy rejects 720-tile stories as well as new tiles.
+
+Linked chapters now end at a drawn exit pipe. Elley-Oh! slides into it and moves
+directly to the next chapter's introduction; after the player chooses an era and begins,
+he falls from a sky pipe. Multiple map exits still show route choices after the slide.
+The final chapter keeps the pink house. An original round biscuit golem named the
+Crumb Keeper patrols nearby and takes three separate stomps or power hits; the house
+door stays locked until it is defeated. Each era has original pixel or vector boss art.
+New generated courses leave the final approach clear of ordinary critters.
+
+Follow-up checks on 2026-10-26: JavaScriptCore game/world suites pass new long-course,
+extension/undo, pause, saved era-change, boss, pipe navigation and sky-arrival checks. A folder-server test saves
+a 50-chapter story larger than the old 4 MB limit. In isolated headless Firefox on port
+8771 with temporary data, a 720-tile chapter opened, the era changed at its intro and
+in pause, the pipe slide navigated to the next chapter, sky-pipe arrival began, and the
+final house stayed locked until the boss's third hit; no page exception was recorded.
+Direct-file browser-only mode opened a new 720-tile course and used the intro/pause
+controls. An actual 390 px Firefox viewport had document width 378 px; its pause menu
+was visually checked. Portal and boss screenshots were reviewed, including boss art in
+all four eras and both themes. All five `AGENTS.md` suites and `git diff --check` pass.
+The local playable server was restarted on port 8770 with this code and responded 200;
+its existing `data/` folder was retained. Headless Firefox logged occasional slow-script
+warnings while drawing; ordinary hardware performance remains unmeasured. Not tested:
+full hand play of a 720-tile chapter,
+Chrome, Safari, Windows, macOS, a real touch screen, or actual audio hardware.
+
+The course builder now has grouped Terrain, Surprise blocks, Critters and Other tools.
+`pipe` draws two solid columns down to the next solid tile or floor, with a rim at each
+run's top and a narrow single column at the right edge. `plant`, `turtle` and `fish` are
+play-time entities: a pipe-mounted snapper hides, rises, bites and sinks, and stays
+hidden near the player; a stomped four-legged turtle becomes a kickable shell that
+eventually wakes; round fish swim and can only be stomped outside water. Moving shells,
+shields and the new powers defeat critters. The spike triangle hitbox remains unchanged.
+
+Each level can set `theme: 'underwater'`; no theme means ground for old saves. Water
+slows movement and falling and allows a swim stroke on each jump press. All four
+styles draw underwater scenery and sand/coral ground; `GameSound.theme(style, theme)`
+selects an original slower underwater tune in that style's voice. The new surprise
+blocks release stationary fire and frost blooms or a striped tail suit. A power grows
+a small player using the existing low-ceiling wait, then takes the first hit while he
+stays big. Fire throws bouncing sparks, frost freezes critters into temporary solid
+blocks, and the striped tail spins, floats and flies after a ground sprint. Shift on
+press, X/F and the on-screen sprint button activate the power; held Shift still sprints.
+All new art uses original pixel grids and per-style palettes or original modern vector
+shapes. New event slots for throw, kick, swim, spin and freeze keep custom audio choices.
+
+`dist/world.js` accepts the new tiles and theme without changing `game.json` version 1.
+Changing the physics theme clears a completion star; changing only game style does not.
+**Older copies of the game reject stories containing the new tiles.** Back up the full
+`data` folder before opening such a story in an older copy. They can still read a story
+whose only new field is `theme`, but will ignore its water physics.
+
+Checks on 2026-10-26: all five suites in `AGENTS.md` pass, including new JavaScriptCore
+checks for pipes, the snapper cycle, shell rebound/falls/kicks, fish, underwater movement, each power,
+low-ceiling growth, frozen block solidity and shattering, damage, all new art in each
+style and theme, new audio event overrides, and new tiles/themes saving and reloading.
+`git diff --check` passes. In isolated headless Firefox on port 8770 with temporary
+`data/`, all eight style/theme combinations saved, reloaded, rendered, and entered play
+with no page error. Eight canvas screenshots were captured in
+`/tmp/leo-powers-screens/` and visually reviewed. A separate Firefox BiDi context at
+390 px had document width 378 px (no sideways scroll). Direct-file browser-only mode
+opened and retained a changed style and underwater theme after reload. Headless Firefox
+logged occasional slow-script timeout warnings while drawing screenshots; no page
+exception was observed. Rendering speed on typical hardware remains unmeasured. Not tested:
+Chrome, Safari, Windows, macOS, a real touch screen, actual microphone and speaker
+hardware, or a hand-played full course. The server on port 8768 belongs to the styles
+worktree and was left untouched.
+
+## Previous work: game styles (`feature/game-styles`)
 
 The user's son asked for the game to be more like a course maker with era styles and a
 look closer to the original platformers. Each chapter now has a game style, chosen under

@@ -112,6 +112,14 @@ class FolderServerTests(unittest.TestCase):
         self.request('/api/state', {'soundSettings': {'volume': .2, 'slots': {}}, 'base': {'soundSettings': 0}}, 'PUT')
         self.assertEqual(json.loads((self.data / 'game.json').read_text())['revisions']['soundSettings'], 1)
 
+    def test_long_chapter_story_over_old_limit_saves(self):
+        level = {'version': 1, 'title': 'Long course', 'tiles': [['ground'] * 720 for _ in range(16)], 'start': {'x': 2, 'y': 13}, 'goal': {'x': 716, 'y': 13}}
+        world = {'format': 'elley-story', 'version': 1, 'levels': [{'id': str(i), 'level': level} for i in range(50)]}
+        self.assertGreater(len(json.dumps({'world': world}).encode()), 4 * 1024 * 1024)
+        status, _, _ = self.request('/api/state', {'world': world}, 'PUT')
+        self.assertEqual(status, 200)
+        self.assertEqual(len(json.loads((self.data / 'game.json').read_text())['world']['levels']), 50)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -13,7 +13,7 @@ from urllib.parse import urlsplit, unquote
 
 ROOT = Path(__file__).resolve().parent
 LOCK = threading.RLock()
-MAX_STATE = 4 * 1024 * 1024
+MAX_STATE = 16 * 1024 * 1024
 MAX_AUDIO = 20 * 1024 * 1024
 SAFE_ID = re.compile(r'[A-Za-z0-9_-]{1,100}\Z')
 # Parts of game.json that pages save. Each has a revision number so a page
