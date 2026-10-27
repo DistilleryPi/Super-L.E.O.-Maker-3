@@ -11,7 +11,8 @@ j.JSValueToStringCopy.argtypes=[ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p]
 j.JSStringGetUTF8CString.argtypes=[ctypes.c_void_p,ctypes.c_char_p,ctypes.c_size_t]
 c=j.JSGlobalContextCreate(None)
 stub='''const noop=()=>{};const elements={};const context=new Proxy({},{get:()=>noop,set:()=>true});function element(){return {value:'',dataset:{},classList:{add:noop,toggle:noop},append:noop,focus:noop,getContext:()=>context,getBoundingClientRect:()=>({left:0,top:0,width:960,height:512}),setPointerCapture:noop};}const document={addEventListener:noop,getElementById:id=>elements[id]||(elements[id]=element()),createElement:element,querySelector:()=>element(),querySelectorAll:()=>[],activeElement:{tagName:'BODY'}};const soundCalls=[];const window={addEventListener:noop,GameSound:{stop:()=>soundCalls.push('stop'),unlock:noop,music:()=>soundCalls.push('music'),stopMusic:noop,effect:e=>soundCalls.push(e)}};const localStorage={getItem:()=>null,setItem:noop};const requestAnimationFrame=noop;'''
-source=(pathlib.Path(__file__).resolve().parents[1]/'dist/game.js').read_text()
+dist=pathlib.Path(__file__).resolve().parents[1]/'dist'
+source=(dist/'styles.js').read_text()+(dist/'game.js').read_text()
 tests='''function assert(v,s){if(!v)throw Error(s)};assert(level.tiles.length===16,'height');playing=true;reset();for(let i=0;i<60;i++)step();assert(player.ground,'land on floor');const oldY=player.y;keys.Space=true;step();assert(player.y<oldY,'jump');keys={};reset();player.x=6*T+5;player.y=9*T;step();assert(player.score===1,'collect coin');reset();player.x=level.goal.x*T;player.y=level.goal.y*T;step();assert(won,'finish');reset();player.y=700;step();assert(dead&&!$('game-over').hidden,'fall shows game over');reset();playing=false;draw();playing=true;draw();'Physics and rendering smoke checks passed';'''
 
 tests+='''
@@ -107,6 +108,29 @@ assert(spikeCase(5*T-22+7,feetOnFloor),'walking into the spike from the left is 
 assert(spikeCase(5*T+26,feetOnFloor),'walking into the spike from the right is game over');
 assert(spikeCase(5*T+5,13*T+20-28),'landing on the spike is game over');
 'All gameplay checks passed, including spikes that hurt only where they are drawn';
+'''
+
+tests+='''
+// Game styles: four looks with an 8-bit fallback; every style draws build and play mode with all parts.
+assert(styles.list.length===4&&styles.get('nope').id==='classic','four styles, unknown ones fall back to 8-bit');
+setLevel(blank());assert(art().id==='classic','courses saved before styles use the 8-bit style');
+for(const id of styles.ids){
+ setStyle(id);assert(art().id===id,'style chosen: '+id);
+ playing=false;level.tiles[13][4]='enemy';level.tiles[12][6]='treatbrick';level.tiles[11][6]='coin';level.tiles[13][8]='spike';level.tiles[10][3]='emptybrick';draw();
+ playing=true;reset();player.shield=10;player.boost=10;player.small=false;pickups.push({kind:'milk',x:100,y:100,w:20,h:20});debris.push({x:1,y:1,vx:0,vy:0,life:3});enemies.push({x:50,y:50,v:1,dead:true,flat:5});draw();playing=false;
+}
+const historyBefore=history.length;setStyle('classic');assert(level.style==='classic'&&history.length===historyBefore+1,'a style change can be undone');$('undo').onclick();assert(level.style==='modern','undo restores the previous style');
+playing=true;setStyle('world');assert(level.style==='modern','the style cannot change while playing');playing=false;
+setStyle('unknown');assert(level.style==='modern','unknown styles are ignored');
+// Elley-Oh! faces the way he walks, swaps walking frames, and has a jumping pose.
+setLevel(blank());playing=true;reset();keys={};for(let i=0;i<10;i++)step();assert(heroPose(player).pose==='stand'&&player.face===1,'stands facing right');
+keys={ArrowLeft:true};const poses=new Set();for(let i=0;i<30;i++){step();poses.add(heroPose(player).pose)}
+assert(player.face===-1&&poses.has('walk1')&&poses.has('walk2'),'walking left faces left and animates');
+keys={Space:true};step();step();assert(heroPose(player).pose==='jump','jumping pose in the air');
+// A stomped critter stays squashed for half a second, then disappears.
+setLevel(blank());playing=true;reset();keys={};for(let i=0;i<10;i++)step();enemies=[{x:player.x,y:14*T-24,v:0,dead:false}];player.y=14*T-24-player.h-2;player.vy=4;step();
+assert(enemies[0].dead&&enemies[0].flat===30,'stomp squashes the critter');for(let i=0;i<30;i++)step();assert(enemies[0].flat===0,'squashed critter disappears');
+'All gameplay checks passed, including game styles, walking poses and squashed critters';
 '''
 
 e=ctypes.c_void_p();s=j.JSStringCreateWithUTF8CString((stub+source+tests).encode());r=j.JSEvaluateScript(c,s,None,None,1,ctypes.byref(e));v=e.value or r;st=j.JSValueToStringCopy(c,v,None);buf=ctypes.create_string_buffer(4096);j.JSStringGetUTF8CString(st,buf,4096);print(buf.value.decode());raise SystemExit(1 if e.value else 0)

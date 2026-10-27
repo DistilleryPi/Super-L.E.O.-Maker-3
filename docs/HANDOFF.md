@@ -1,6 +1,6 @@
 # Super L.E.O. Maker 3 handoff
 
-Updated 2026-10-25. Development computer: Linux Mint.
+Updated 2026-10-26. Development computer: Linux Mint.
 
 ## Project and repository
 
@@ -16,7 +16,9 @@ Updated 2026-10-25. Development computer: Linux Mint.
 - `ae42117` README only. `1f610cf` the full game, built with Codex (2026-10-25).
 - PR #1 merged 2026-10-25 as `e8ebea2`, from the DistilleryPi GitHub account: three save
   and World Maker fixes, plus `AGENTS.md`, `CLAUDE.md` and this handoff.
-- Branch `fix/spike-hitbox` (pull request open, not merged): spikes hurt only where drawn.
+- PR #2 merged 2026-10-25 as `9918ca2`: spikes hurt only where drawn. The merged branches
+  `fix/two-tab-saves-map-restore` and `fix/spike-hitbox` still exist on GitHub.
+- Branch `feature/game-styles` (worktree `~/Projects/jump-workshop-styles`): four game styles.
 
 ## Current save behaviour
 
@@ -29,7 +31,47 @@ Updated 2026-10-25. Development computer: Linux Mint.
   or when shown again, which covers a second browser. A refused page shows a banner
   asking to reload.
 
-## Latest work: spike hitbox (`fix/spike-hitbox`)
+## Latest work: game styles (`feature/game-styles`)
+
+The user's son asked for the game to be more like a course maker with era styles and a
+look closer to the original platformers. Each chapter now has a game style, chosen under
+**Game style** above the course: `classic` (8-bit, 1985), `adventure` (8-bit deluxe,
+1988), `world` (16-bit, 1990) and `modern` (HD). It is stored as `level.style`; levels
+without it (all saves made before) draw as `classic`. `validLevel` is unchanged, so
+older copies of the game ignore the field.
+
+- `dist/styles.js` (new, `window.GameStyles`): all drawing. Pixel styles share sprite
+  shapes written as letter grids (16 × 16 per block, drawn at 2 screen pixels per sprite
+  pixel), with each style's palette, optional automatic black outline, its own bricks,
+  ground (with grass or lip tops that join neighbouring ground), scenery and score bar.
+  `modern` is vector drawing and keeps the original pink home. The pink home, caramel chip
+  critters, milk, treats, shields and jump wings are redrawn per style. All art and
+  tunes are original; the repository is public, so never copy sprites or music from
+  other games.
+- `dist/game.js`: the style picker, toolbox pictures drawn in the current style, an
+  in-canvas score bar, walking/jumping poses and facing (`player.face`, `player.anim`,
+  `heroPose()`), and stomped critters that stay squashed for 30 frames (`e.flat`). The
+  old drawing functions (`tile`, `character`, `rewardIcon`, `pinkCastle`) remain as thin
+  wrappers because the tests call them. Gameplay, hitboxes and physics are unchanged.
+- `dist/sound.js`: `GameSound.theme(id)` picks each style's built-in music (melody and
+  bass) and effect voice: pulse waves for the 8-bit styles, vibrato and echo for 16-bit
+  and modern. Without a theme (sound studio) the original tune plays. Custom recordings
+  still override the built-in sounds.
+
+Checks on 2026-10-26: all five suites pass, with new checks for every style drawing build
+and play mode, style undo, the play-mode lock, unknown styles, walking and jumping
+poses, squashed critters, the style surviving save and reload (`test_world.py`), and
+each style's music (`audio-checks.js`). In headless Firefox, with a local Marionette
+script not in the repository: the style saves to `data/game.json` and survives a reload;
+music and effects start without errors in all four styles; two seconds of play in each
+style draw without errors; the page has no sideways scroll at 390 pixels wide; opening
+`dist/index.html` directly works and keeps the style in browser storage. Screenshots of
+every style were reviewed. Not tested: listening to the music on speakers, Chrome,
+Safari, Windows, macOS, real touch screens.
+
+The user authorized committing this branch and opening its pull request. Merging was not authorized.
+
+## Previous work: spike hitbox (PR #2, merged)
 
 Spikes are drawn as a triangle (base corners 2,31 and 30,31, point 16,5 inside the 32×32
 square), but any overlap with the square ended the run, so clearing the point or brushing
@@ -44,7 +86,7 @@ page in headless Firefox: on `main` all four near misses were Game Over; on the 
 they are safe and the three touches still end the run. Not played by hand. No other
 gameplay changed.
 
-The user authorized this fix and opening its pull request. Merging was not authorized.
+The user authorized the fix, its pull request and then the merge.
 
 ## PR #1: saves, map markers and restore (merged)
 
@@ -78,7 +120,7 @@ Gameplay for young players:
 
 6. Jump forgiveness: allow a jump a few frames after leaving a ledge (coyote time) and
    remember a jump pressed just before landing (jump buffer).
-7. Done on `fix/spike-hitbox`: spikes hurt only where the triangle is drawn.
+7. Done in PR #2: spikes hurt only where the triangle is drawn.
 8. Before Play, warn if the start or castle is inside a block or has no floor.
 9. Custom sound effects create a new `Audio` element per effect (noticeable lag), and a
    long recording assigned to an effect plays in full each time. Decode once with Web
@@ -96,6 +138,15 @@ Repository and sharing:
 14. Naming: pages say "Jump Workshop" and "Elley-Oh! World Maker", never "Super L.E.O.
     Maker 3". The help dialog still says chapters save "in this browser".
 15. The public repository has no LICENSE file; that choice is the user's.
+
+Ideas for game styles (not started):
+
+16. Style moves, as in course makers: a spin jump in 16-bit, a wall jump in modern.
+17. Course themes within a style: underground, castle, night or underwater skies and blocks.
+18. A visible mystery block (`?`) as well as the hidden-item bricks; needs a new tile
+    type in `world.js` (`tiles`) and `game.js`.
+19. Give the page around the course a brighter maker look and the game's real name
+    (see item 14). The sound studio still previews only the original tune.
 
 ## Supporting documents
 

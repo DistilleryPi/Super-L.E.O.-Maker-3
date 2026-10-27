@@ -51,6 +51,10 @@ Move with arrows or A/D, jump with Space, W, or Up, and hold Shift or Sprint for
 
 Treats add to a treat counter. Shields last 10 seconds and protect against enemies/spikes. Jump boosts last 12 seconds. Collecting another refreshes its timer. Restart restores hidden items and resets size and powers. Reaching the pink house door completes the chapter and offers connected next chapters.
 
+## Game styles
+
+Like a course maker's style switch, each chapter can be drawn in one of four looks: **8-bit** (1985-style chunky pixels and a plain blue sky), **8-bit deluxe** (1988-style black outlines and bolted background blocks), **16-bit** (1990-style shaded sprites, grassy ground and hills with eyes) and **Modern** (smooth shapes and layered hills). Pick one under Game style above the course. Elley-Oh!, blocks, critters, coins, items, the pink home, the score bar, the toolbox pictures and the built-in music all change; the course and its gameplay stay the same. The style is saved with the chapter. Chapters made before styles existed use 8-bit. All art and tunes are original, drawn and written in code; they borrow each era's general feel, not any other game's sprites or music.
+
 ## World Maker
 
 Open **World Maker**, then **Build your world**:
@@ -75,12 +79,13 @@ Assign library clips to background music and individual effects. Music loops dur
 ## Source and verification
 
 - `start_game.py`: localhost server, atomic folder saves, audio storage.
-- `dist/game.js`: course editor, physics, character/castle drawings.
+- `dist/game.js`: course editor, physics, style picker.
+- `dist/styles.js`: the four game styles (pixel sprites, scenery, score bars, the pink home).
 - `dist/world.js`: chapter library, story graph, and map data.
 - `dist/world-maker.js`: draggable map editor and photo guide.
-- `dist/sound.js`, `sound-studio.js`, `instruments.js`: audio library and instruments.
+- `dist/sound.js`, `sound-studio.js`, `instruments.js`: audio library, instruments and each style's built-in music.
 - `dist/folder-store.js`: folder-save queue and browser fallback.
 
 Run `python3 tests/test_world.py`, `python3 tests/test_game.py`, `python3 tests/test_audio.py`, and `python3 -B tests/test_folder_sync.py` on Linux with JavaScriptCore installed. Run `python3 -B -m unittest discover -s tests -p test_folder_server.py -v` for isolated localhost server tests.
 
-Checks cover gameplay, milk movement, growing/shrinking, story/map validation and branching, map marker spacing up to 50 chapters, restoring a full-size story backup, JSON/audio persistence, atomic backups, two tabs or browsers saving the same story, and rejected cross-origin writes. Firefox checks cover real dragging/keyboard map movement, drawing upload, branch choices, instrument WAV generation, folder migration, and loading after browser storage is cleared. Microphone capture is tested with a fake microphone; actual microphone and speaker hardware still need a check on your computer.
+Checks cover gameplay, game styles (every style draws build and play mode, styles save with the chapter, undo, play-mode lock, each style's music), walking and jumping poses, squashed critters, milk movement, growing/shrinking, story/map validation and branching, map marker spacing up to 50 chapters, restoring a full-size story backup, JSON/audio persistence, atomic backups, two tabs or browsers saving the same story, and rejected cross-origin writes. Firefox checks cover real dragging/keyboard map movement, drawing upload, branch choices, instrument WAV generation, folder migration, and loading after browser storage is cleared. Microphone capture is tested with a fake microphone; actual microphone and speaker hardware still need a check on your computer.
