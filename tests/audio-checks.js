@@ -6,6 +6,9 @@ let done=false,failure='';function assert(v,s){if(!v)throw Error(s)}
  const recorded=GameSound.clips[0].id;GameSound.setSlot('death',recorded);GameSound.unlock();GameSound.effect('death');assert(media.at(-1).played,'death uses selected recording');
  GameSound.setSlot('music',recorded);GameSound.music();assert(media.at(-1).loop,'custom music loops');GameSound.stop();assert(media.at(-1).paused,'stop pauses music');
  GameSound.setSlot('jump','builtin');const before=oscillators;GameSound.effect('jump');assert(oscillators>before,'built in effect plays');GameSound.setSlot('jump','mute');const muted=oscillators;GameSound.effect('jump');assert(oscillators===muted,'silent assignment works');
+ GameSound.setSlot('music','builtin');GameSound.theme('classic');let notesBefore=oscillators;GameSound.music();assert(oscillators===notesBefore+2,'8-bit style music plays a tune and a bass line');
+ GameSound.theme('world');notesBefore=oscillators;GameSound.music();assert(oscillators===notesBefore+3,'16-bit style tune wobbles (vibrato)');
+ GameSound.theme('missing');notesBefore=oscillators;GameSound.music();assert(oscillators===notesBefore+1,'unknown styles play the original tune');GameSound.stop();GameSound.setSlot('music',recorded);
  get('clip-name').value='Family music';const input={files:[new Blob(['song'],{type:'audio/wav'})],value:'audio'};await get('audio-upload').onchange({target:input});assert(GameSound.clips.length===2&&GameSound.clips[1].name==='Family music','uploaded music saved');
  const select=get('slot-music');select.value=GameSound.clips[1].id;select.onchange();assert(GameSound.settings.slots.music===select.value,'studio selection saved');GameSound.reload();assert(GameSound.settings.slots.music===select.value,'selection survives reload');
  get('volume').oninput({target:{value:'40'}});assert(GameSound.settings.volume===.4,'volume saved');
