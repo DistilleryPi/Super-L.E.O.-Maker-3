@@ -233,6 +233,39 @@ for(const id of styles.ids){const s=styles.get(id);for(const on of [true,false])
 'Long course, pause menu, era change, guardian, portal, Queen Mom, snapper, extension, raccoon, rock and switch checks passed';
 '''
 
+tests+='''
+// Players: every character draws in each era, theme, size, pose and power; whoever is not playing waits in the castle.
+for(const id of styles.ids)for(const theme of ['ground','underwater','house']){const s=styles.get(id);s.setTheme(theme);for(const h of styles.heroes)for(const big of [false,true])for(const pose of ['stand','walk1','walk2','jump'])for(const power of [null,'fire','ice','tanuki','burger','sword'])s.hero(context,100,100,{who:h.id,big,pose,power,face:pose==='walk1'?-1:1});for(const t of ['bedbox','burgerdirt','swordbrick'])for(const build of [true,false])s.tile(context,t,0,0,{build,tick:20,near:()=>''});for(const k of ['burger','sword'])s.item(context,k,0,0);s.mom(context,10,10,{who:'dad',face:-1});s.hud(context,{name:'DADDEROONS',short:'Dadderoons',coins:1,treats:2,big:true,power:'burger',chapter:3})}
+assert(styles.heroes.map(h=>h.name).join()==='Elley-Oh!,Princess Blyth,King Dadderoons,Queen Mom','four players to choose from');
+setLevel(blank());playing=true;keys={};reset();chooseHero('mom');assert(hero==='mom'&&prisoner()==='dad'&&prisonerName()==='King Dadderoons'&&heroPose(player).who==='mom','when Queen Mom plays, King Dadderoons waits in the castle');
+chooseHero('blyth');assert(prisonerName()==='Queen Mom'&&$('pause-hero').value==='blyth'&&$('intro-hero').value==='blyth','other players free Queen Mom; every picker shows the choice');chooseHero('nobody');assert(hero==='blyth','unknown players are ignored');
+reset();assert($('status').textContent.includes('Queen Mom'),'the goal names who to save');player.power='sword';draw();player.power='burger';player.flight=20;draw();chooseHero('elley');
+// Difficult: a critter that touches milk drinks it, grows big and takes two bonks. Easy leaves milk alone.
+setLevel(blank());level.tiles[13][8]='enemy';playing=true;keys={};chooseDifficulty('easy');reset();player.x=2*T;player.y=14*T-player.h;let chip=enemies[0];pickups=[{kind:'milk',x:chip.x-10,y:chip.y+4,w:20,h:20,vx:1.5,vy:0,age:20}];step();assert(!chip.big&&pickups.length===1,'easy: milk walks past critters');
+chooseDifficulty('hard');assert($('difficulty').value==='hard','the difficulty pickers follow the choice');reset();player.x=2*T;player.y=14*T-player.h;chip=enemies[0];pickups=[{kind:'milk',x:chip.x-10,y:chip.y+4,w:20,h:20,vx:1.5,vy:0,age:20}];step();assert(chip.big&&!pickups.length&&chip.w===39&&chip.h===36&&Math.abs(chip.y+chip.h-14*T)<1,'difficult: a critter drinks the milk and grows big on the same spot');draw();
+player.x=chip.x+8;player.y=chip.y-player.h+3;player.vy=4;updateCritters();assert(!chip.big&&!chip.dead&&chip.w===26&&player.vy<0,'the first bonk shrinks a big critter');
+defeat(chip);assert(!chip.dead,'a second hit right away does not count');player.x=20*T;for(let i=0;i<25;i++)updateCritters();player.x=chip.x+4;player.y=chip.y-player.h+3;player.vy=4;updateCritters();assert(chip.dead,'the second bonk defeats it');
+setLevel(blank());level.tiles[13][8]='turtle';playing=true;keys={};reset();const tur=critters[0];growCritter(tur);player.x=tur.x+10;player.y=tur.y-player.h+3;player.vy=4;updateCritters();assert(!tur.big&&tur.state==='walk','a big turtle shrinks before it hides in its shell');
+setLevel(blank());level.tiles[13][8]='enemy';playing=true;reset();const fast=enemies[0],fx=fast.x;player.x=20*T;updateCritters();assert(Math.abs(fast.x-fx+1.3)<1e-9,'difficult critters walk faster');chooseDifficulty('easy');reset();const slow=enemies[0],sx=slow.x;updateCritters();assert(slow.x===sx-1,'easy critters walk at the classic speed');
+// A bed box puts the critters on screen to sleep: they stand still, cannot hurt, and a bonk still defeats them.
+setLevel(blank());level.tiles[10][5]='bedbox';level.tiles[13][9]='enemy';level.tiles[13][60]='enemy';playing=true;keys={};reset();cam=0;player.x=5*T+5;player.y=11*T+2;player.vy=-6;keys={Space:true};step();keys={};const nap=enemies[0],awake=enemies[1];assert(nap.sleep>400&&!awake.sleep&&tileAt(5,10)==='emptybrick'&&solid(5,10),'bumping a bed box puts on-screen critters to sleep and empties it');
+draw();const napX=nap.x;player.x=nap.x;player.y=nap.y;player.vy=0;player.hurt=0;updateCritters();assert(nap.x===napX&&!dead&&player.hurt===0,'sleeping critters stay still and harmless');
+player.y=nap.y-player.h+3;player.vy=4;updateCritters();assert(nap.dead,'a bonk defeats a sleeping critter');
+reset();enemies[0].sleep=1;const wakeX=enemies[0].x;player.x=20*T;updateCritters();updateCritters();assert(enemies[0].x!==wakeX,'critters wake up and walk again');
+// Daddo burgers: stand on a dig spot and press down to dig one up; sprint a little, jump, then keep tapping jump to fly.
+setLevel(blank());level.tiles[14][6]='burgerdirt';playing=true;keys={};reset();assert(solid(6,14),'dig spots are solid ground');player.x=6*T+5;player.y=14*T-player.h;player.vy=0;step();keys={ArrowDown:true};step();keys={};assert(dug.has('6,14')&&tileAt(6,14)==='ground'&&pickups.some(i=>i.kind==='burger'),'pressing down on a dig spot digs up a Daddo burger');
+for(let i=0;i<80&&player.power!=='burger';i++)step();assert(player.power==='burger','the burger pops up and is collected');keys={ArrowDown:true};step();keys={};assert(pickups.length===0,'a dug spot gives only one burger');reset();assert(!dug.size,'restart buries the burger again');
+player.power='burger';player.x=10*T;player.y=14*T-player.h;player.vy=0;step();keys={ArrowRight:true,ShiftLeft:true};for(let i=0;i<32;i++)step();assert(player.run>=30,'a short sprint charges the burger');keys.Space=true;step();assert(player.flight>0,'jumping after the sprint starts flying');
+let top=player.y;for(let i=0;i<120;i++){keys.Space=i%2===0;step();top=Math.min(top,player.y)}assert(top<5*T,'tapping jump keeps flying up: '+top);keys={};
+reset();player.power='burger';player.x=10*T;player.y=14*T-player.h;step();keys={Space:true};step();keys={};let hop=player.y;for(let i=0;i<40;i++){keys.Space=i%2===0;step();hop=Math.min(hop,player.y)}assert(player.flight===0&&hop>8*T,'no flying without the sprint first');keys={};
+// The sword swings with the power button: it defeats critters, cuts rocks and hits the block in front.
+setLevel(blank());level.tiles[13][7]='enemy';playing=true;keys={};reset();player.power='sword';player.x=6*T;player.y=14*T-player.h;player.face=1;usePower();assert(player.swing===14,'the power button swings the sword');updateSword();assert(enemies[0].dead,'the sword defeats a critter in front');usePower();assert(player.swing===13,'one swing at a time');
+hazards=[{kind:'rock',x:player.x+player.w+4,y:player.y+4,w:12,h:12,vx:-1,vy:0,age:0}];updateSword();assert(hazards[0].dead,'the sword cuts rocks');
+setLevel(blank());level.tiles[13][7]='bedbox';level.tiles[13][12]='enemy';playing=true;keys={};reset();player.power='sword';player.x=6*T+4;player.y=14*T-player.h;player.face=1;usePower();for(let i=0;i<5;i++)updateSword();assert(enemies[0].sleep>0,'the sword can hit a bed box');
+setLevel(blank());level.tiles[11][5]='swordbrick';playing=true;keys={};reset();player.x=5*T+5;player.y=12*T;player.vy=-7;keys.Space=true;step();keys={};assert(pickups[0]?.kind==='sword','a sword block releases a sword');for(let i=0;i<14;i++)step();player.x=pickups[0].x;player.y=11*T-player.h;player.vy=0;step();assert(player.power==='sword'&&!pickups.length,'touching the sword picks it up');
+'Player, difficulty, bed box, Daddo burger and sword checks passed';
+'''
+
 e=ctypes.c_void_p();s=j.JSStringCreateWithUTF8CString((stub+source+tests).encode());r=j.JSEvaluateScript(c,s,None,None,1,ctypes.byref(e));v=e.value or r;st=j.JSValueToStringCopy(c,v,None);buf=ctypes.create_string_buffer(4096);j.JSStringGetUTF8CString(st,buf,4096);print(buf.value.decode())
 if e.value:raise SystemExit(1)
 
@@ -255,10 +288,14 @@ $('finish-replay').onclick();assert(!inside&&!level.room&&W===outdoorWidth&&!won
 c2=j.JSGlobalContextCreate(None);e2=ctypes.c_void_p();s2=j.JSStringCreateWithUTF8CString((stub+world_stub+source+"function assert(v,s){if(!v)throw Error(s)};"+world_tests).encode());r2=j.JSEvaluateScript(c2,s2,None,None,1,ctypes.byref(e2));st2=j.JSValueToStringCopy(c2,e2.value or r2,None);buf2=ctypes.create_string_buffer(4096);j.JSStringGetUTF8CString(st2,buf2,4096);print(buf2.value.decode())
 if e2.value:raise SystemExit(1)
 # On iPad, holding a touch button must not start a text selection (which cancels the press).
-touch_stub=stub.replace("querySelectorAll:()=>[]","querySelectorAll:q=>q==='[data-key]'?[pad]:[]")
-touch_stub="const heard={},pad={dataset:{key:'ArrowRight'},setPointerCapture:()=>{},addEventListener:(t,f,o)=>heard[t]={f,o}};const getSelection=()=>({removeAllRanges:()=>heard.cleared=true});"+touch_stub
-touch_tests="""function assert(v,s){if(!v)throw Error(s)};let stopped=0;const ev={cancelable:true,pointerId:1,preventDefault:()=>stopped++};
-assert(heard.touchstart&&heard.touchstart.o.passive===false,'touch buttons listen with a cancelable touchstart');heard.touchstart.f(ev);assert(stopped===1,'touchstart is cancelled so Safari does not select text');
-pad.oncontextmenu(ev);pad.onselectstart(ev);assert(stopped===3,'long-press menu and selection are blocked');
-playing=true;reset();pad.onpointerdown(ev);assert(keys.ArrowRight&&heard.cleared,'press works and clears any old selection');pad.onpointercancel();assert(!keys.ArrowRight,'cancel releases');'Touch button checks passed'"""
+touch_stub=stub.replace("querySelectorAll:()=>[]","querySelectorAll:q=>q==='[data-key]'?padList:[]").replace("const window={addEventListener:noop,","const window={addEventListener:(t,f)=>heard['window-'+t]=f,")
+touch_stub="const heard={},pad=(key,left)=>({dataset:{key},classList:{toggle:()=>{}},getBoundingClientRect:()=>({left,right:left+96,top:400,bottom:488,width:96}),addEventListener:(t,f,o)=>heard[key+t]={f,o}}),padList=[pad('ShiftLeft',100),pad('Space',196)];const getSelection=()=>({removeAllRanges:()=>heard.cleared=true});"+touch_stub
+touch_tests="""function assert(v,s){if(!v)throw Error(s)};let stopped=0;const at=(x,id=1)=>({cancelable:true,pointerId:id,clientX:x,clientY:440,preventDefault:()=>stopped++});const [sprint,jump]=padList;
+assert(heard.Spacetouchstart&&heard.Spacetouchstart.o.passive===false,'touch buttons listen with a cancelable touchstart');heard.Spacetouchstart.f(at(0));assert(stopped===1,'touchstart is cancelled so Safari does not select text');
+jump.oncontextmenu(at(0));jump.onselectstart(at(0));assert(stopped===3,'long-press menu and selection are blocked');
+playing=true;reset();sprint.onpointerdown(at(150));assert(keys.ShiftLeft&&!keys.Space&&heard.cleared,'a thumb on Sprint presses Sprint');
+heard['window-pointermove'](at(196));assert(keys.ShiftLeft&&keys.Space,'a thumb on the seam presses Sprint and Jump together');
+heard['window-pointermove'](at(260));assert(!keys.ShiftLeft&&keys.Space,'sliding onto Jump keeps Jump and lets go of Sprint');
+jump.onpointerdown(at(120,2));assert(keys.ShiftLeft&&keys.Space,'a second finger adds its button');heard['window-pointercancel'](at(0,2));assert(!keys.ShiftLeft&&keys.Space,'lifting a finger releases only its button');
+heard['window-pointerup'](at(0));assert(!keys.Space&&!keys.ShiftLeft,'lifting the last finger releases everything');'Touch button checks passed'"""
 c3=j.JSGlobalContextCreate(None);e3=ctypes.c_void_p();s3=j.JSStringCreateWithUTF8CString((touch_stub+source+touch_tests).encode());r3=j.JSEvaluateScript(c3,s3,None,None,1,ctypes.byref(e3));st3=j.JSValueToStringCopy(c3,e3.value or r3,None);buf3=ctypes.create_string_buffer(4096);j.JSStringGetUTF8CString(st3,buf3,4096);print(buf3.value.decode());raise SystemExit(1 if e3.value else 0)

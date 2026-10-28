@@ -39,6 +39,28 @@ Updated 2026-10-27. Development computer: Linux Mint.
 
 ## Latest work: critters and powers (`feature/critters-and-powers`)
 
+Claude follow-up 4 (2026-10-28, uncommitted, on top of `c87bb88`): players, difficulty, new items, touch pads.
+- Players: `styles.heroes` (elley, blyth, dad, mom). Pixel art uses shared letters (R main, B second, O shoes)
+  so `POWER_LOOK` recolours any character; the royals are front-facing and their poses come from
+  `frontPoses` (big = `tall` body). Elley-Oh! was redrawn as an electrician (hard hat, tool belt, no
+  moustache) in all styles, at the user's request. `modernRoyal` draws the royals in Modern.
+  `prisoner()` is Queen Mom, or King Dadderoons when Queen Mom plays; `s.mom(…,{who})` draws them.
+  The old MOM sprite and `modernMom` were removed.
+- Difficulty: `difficulty` easy|hard, saved in localStorage `jumpWorkshopDifficulty` (player in
+  `jumpWorkshopHero`). Hard: `drinkMilk` → `growCritter` (1.5×, drawn by `drawCritter`); `defeat` and
+  stomps shrink first (`shrinkCritter`, 20-frame `bonk` grace); walkers 1.3× speed; raccoons every 110
+  frames. Easy is the previous rules unchanged.
+- Tiles `swordbrick`, `bedbox`, `burgerdirt` (added to `world.js` tiles). Bed box → `sleepAll` (critters
+  on screen, 480 frames, `asleep`). Dig spot: ↓ while standing on it (`dig`, `dug` set) releases a
+  `burger` power; burger flight reuses the tail-suit run meter (30 frames instead of 60, 300 frames of
+  flight). Sword power: `usePower` starts `swing`; `updateSword` hits critters, hazards and the block in front.
+- Touch: `padKeys` presses every button within 10 px of each active pointer and follows `pointermove`,
+  so a thumb on the seam presses Sprint and Jump. CSS joins ◀ ▶ and Sprint / Jump into pads.
+- Checks: all five suites; new "Player, difficulty, bed box, Daddo burger and sword checks" and a
+  rewritten "Touch button checks" (both fail on `c87bb88`); Firefox renders of every character, pose
+  and power in all four styles, plus big/sleeping critters, sword, wings and the iPad layout. Not
+  hand-played; not tested on a real iPad.
+
 Claude follow-up 3 (2026-10-28, uncommitted, on top of `f144b97`): iPad / Home Screen app.
 - Touch buttons (`[data-key]`) no longer start an iOS text selection, which cancelled the
   press and left the button dead: non-passive `touchstart` with `preventDefault`, blocked
