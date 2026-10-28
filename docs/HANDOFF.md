@@ -39,7 +39,7 @@ Updated 2026-10-27. Development computer: Linux Mint.
 
 ## Latest work: critters and powers (`feature/critters-and-powers`)
 
-Claude follow-up 4 (2026-10-28, uncommitted, on top of `c87bb88`): players, difficulty, new items, touch pads.
+Claude follow-up 4 (2026-10-28, committed as `a0b1596`): players, difficulty, new items, touch pads.
 - Players: `styles.heroes` (elley, blyth, dad, mom). Pixel art uses shared letters (R main, B second, O shoes)
   so `POWER_LOOK` recolours any character; the royals are front-facing and their poses come from
   `frontPoses` (big = `tall` body). Elley-Oh! was redrawn as an electrician (hard hat, tool belt, no
@@ -60,6 +60,10 @@ Claude follow-up 4 (2026-10-28, uncommitted, on top of `c87bb88`): players, diff
   rewritten "Touch button checks" (both fail on `c87bb88`); Firefox renders of every character, pose
   and power in all four styles, plus big/sleeping critters, sword, wings and the iPad layout. Not
   hand-played; not tested on a real iPad.
+- Phone fix (after `a0b1596`): the user's phone screenshot showed ▶, Sprint and ▼ overlapping, because
+  the iPad positions are fixed pixels. `@media(pointer:coarse) and (max-width:600px)` sizes the pads
+  with `vw` (`--aw`, `--sw`, `--jw`) and moves ▼ above ◀ ▶. Checked in Firefox frames at 390×844 and
+  320×568 (no overlaps); not tested on a real phone.
 
 Claude follow-up 3 (2026-10-28, uncommitted, on top of `f144b97`): iPad / Home Screen app.
 - Touch buttons (`[data-key]`) no longer start an iOS text selection, which cancelled the
