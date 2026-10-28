@@ -38,6 +38,30 @@ Updated 2026-10-27. Development computer: Linux Mint.
 
 ## Latest work: critters and powers (`feature/critters-and-powers`)
 
+Claude follow-up 2 (2026-10-27 evening, uncommitted, on top of `33c6cb3`):
+- The final boss is no longer outside. The final house door fades into a one-screen boss
+  room (`houseRoom`, theme `house`, flag `room`; built in memory and never saved;
+  `validLevel` still rejects theme `house`). `inside.outdoor` keeps the chapter level, and
+  `flushChapter`, `setStyle` and the `pagehide` draft use it. A gate (`GATE_X`) holds Queen
+  Mom (renamed from Princess Mom) until the boss falls. At the user's request the boss is the
+  Crocodile Boss (`croc: true` on the boss critter, `crocBurp`; an earlier Raccoon Boss
+  and the throwing rats were dropped). It paces (`bossMove`, no hop), opens its jaws, and
+  burps flames into `hazards`, sooner after each hit and a second, higher flame on its last
+  hit point. The Crumb Keeper art and code remain, but nothing spawns it now. Try again restarts the room; Play again, Back to builder and
+  starting a chapter call `leaveHouse()`.
+- ON/OFF switches: tiles `switch`, `redblock`, `blueblock` (Switches group; accepted by
+  `world.js`). `switchOn` starts true each run; `solidTile` makes red solid when ON and blue
+  when OFF. `flipSwitch` runs from head bumps and tail spins (`hitBlock`), kicked shells and
+  fire/ice (`hitSwitches`), with a 12-frame cooldown, and lifts anyone caught inside a block
+  that turns solid. Make 12× longer adds a switch bridge section. Art in `switchTile`.
+- New `raccoon` tile (Critters; accepted by `world.js`; added to Make 12× longer on land):
+  faces the player and throws rocks in an arc (`hazards`, `updateHazards`): rocks hurt on
+  contact, a shield brushes them off, and they break on blocks. Original pixel and vector
+  art for the raccoon, rock, crocodile, flames and house interior in all four styles.
+- Checks: all five suites and `git diff --check` pass; the new checks fail on `33c6cb3`.
+  Headless Firefox screenshots (temporary data) of the room in all four styles, the rescue,
+  and raccoons throwing rocks were reviewed; no page errors. Not hand-played.
+
 Claude follow-up (2026-10-27, on top of Codex's work; Codex's diff was
 backed up first). From the user's play-testing:
 - The family's three chapters were still 60 tiles. **Make 12× longer** (was "Extend to 720
@@ -48,7 +72,7 @@ backed up first). From the user's play-testing:
 - Snappers centred on their pipe: `pipeUnder` pairs pipe columns from each run's left end
   (it had used column parity), and `pipeHalf` in `styles.js` draws pipes the same way.
 - "Chapter 3 keeps repeating": after the final chapter the story had no way forward, and the
-  game reopened the last-played chapter. Defeating the Crumb Keeper now frees Princess Mom
+  game reopened the last-played chapter. Defeating the Crumb Keeper now frees Queen Mom
   (original art in all four styles): she walks out, thanks Elley-Oh! in a speech bubble with
   hearts, then the finish sign offers **Start over at Chapter 1**, and the story's selected
   chapter becomes chapter 1. A `mode=play` link is removed from the address after it starts,

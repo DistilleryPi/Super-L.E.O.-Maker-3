@@ -1,6 +1,6 @@
 'use strict';
 window.StoryWorld=(()=>{
- const KEY='jumpWorkshopWorld',tiles=new Set(['','ground','brick','pipe','treatbrick','milkbrick','shieldbrick','jumpbrick','firebrick','icebrick','tanukibrick','coin','enemy','spike','plant','turtle','fish']);let world;
+ const KEY='jumpWorkshopWorld',tiles=new Set(['','ground','brick','pipe','treatbrick','milkbrick','shieldbrick','jumpbrick','firebrick','icebrick','tanukibrick','coin','enemy','spike','plant','turtle','fish','raccoon','switch','redblock','blueblock']);let world;
  const folder=window.FolderSave;
  function readStore(){const disk=folder?.read('world');return disk?JSON.stringify(disk):localStorage.getItem(KEY)}
  function saveStore(value){if(folder?.enabled){try{localStorage.setItem(KEY,JSON.stringify(value))}catch{}folder.write('world',value)}else localStorage.setItem(KEY,JSON.stringify(value))}
