@@ -4,7 +4,8 @@ Updated 2026-10-27. Development computer: Linux Mint.
 
 ## Project and repository
 
-- GitHub: https://github.com/DistilleryPi/Super-L.E.O.-Maker-3 (public).
+- GitHub: https://github.com/DistilleryPi/Super-L.E.O.-Maker-3 (public; briefly private before
+  2026-10-28). Keep `data/` out of it regardless.
 - Local main checkout: `~/Projects/jump-workshop`. Codex built the game there. Work
   happens on a branch in this checkout, or in a separate `git worktree` while another
   agent is active in it.
@@ -37,6 +38,29 @@ Updated 2026-10-27. Development computer: Linux Mint.
   asking to reload.
 
 ## Latest work: critters and powers (`feature/critters-and-powers`)
+
+Claude follow-up 3 (2026-10-28, uncommitted, on top of `f144b97`): iPad / Home Screen app.
+- Touch buttons (`[data-key]`) no longer start an iOS text selection, which cancelled the
+  press and left the button dead: non-passive `touchstart` with `preventDefault`, blocked
+  `contextmenu`/`selectstart`, selection cleared on press, and `-webkit-user-select:none`
+  plus `-webkit-touch-callout:none` on buttons. Regression test: "Touch button checks"
+  in `tests/test_game.py` (fails on `f144b97`).
+- `updateMode` sets `body.playing`. Under `@media(pointer:coarse)` Play mode is full screen:
+  the canvas fills the width, and round buttons sit over it (◀ ▶ ▼ bottom left, Sprint/power
+  and Jump bottom right, Pause top right), hidden while a pause/finish/game-over card shows.
+- Installable web app: `manifest.webmanifest`, `icon-*.png` (drawn from the ↗ logo),
+  Apple Home Screen meta tags on all three pages, `install.js` and `sw.js` (network first,
+  cache fallback). The service worker registers only on https and only when
+  `window.FolderBootstrap` is null, so the family launcher never uses it.
+- Hosted on GitHub Pages: https://distillerypi.github.io/Super-L.E.O.-Maker-3/ (repo made
+  public 2026-10-28 at the user's request). `.github/workflows/pages.yml` publishes `dist/`
+  on pushes to `main` and, until it merges, `feature/critters-and-powers`; the
+  `github-pages` environment allows both branches. Drop the feature branch from both once
+  merged.
+- Checked: all five suites; headless Firefox at 1180×820 with touch styles forced; offline
+  reload of all three pages after the server stopped. Not tested on a real iPad or Safari.
+- Noted to the user: the classic hero sprite resembles a well-known plumber character; the
+  icon deliberately does not use it.
 
 Claude follow-up 2 (2026-10-27 evening, uncommitted, on top of `33c6cb3`):
 - The final boss is no longer outside. The final house door fades into a one-screen boss

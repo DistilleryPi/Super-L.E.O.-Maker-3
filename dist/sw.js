@@ -1,0 +1,5 @@
+// Offline copy for the Home Screen app. Each file is fetched fresh when online and served from the cache when offline.
+const CACHE='jump-workshop-v1',FILES=['./','index.html','map.html','sounds.html','style.css','folder-bootstrap.js','folder-store.js','world.js','sound.js','styles.js','game.js','map.js','world-maker.js','instruments.js','sound-studio.js','install.js','manifest.webmanifest','icon-180.png','icon-192.png','icon-512.png','icon-maskable.png'];
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET'||new URL(r.url).origin!==location.origin)return;e.respondWith(fetch(r).then(res=>{if(res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(r,copy))}return res}).catch(()=>caches.match(r,{ignoreSearch:true}).then(hit=>hit||caches.match('index.html'))))});
