@@ -39,6 +39,20 @@ Updated 2026-10-27. Development computer: Linux Mint.
 
 ## Latest work: critters and powers (`feature/critters-and-powers`)
 
+Claude follow-up 5 (2026-10-28, on top of `d60a83c`): Henry, Blyth's hover and a random hostage.
+- Henry the Carpenter (`henry`, short "Henry"): `henryPose` builds his poses from Elley-Oh!'s, with
+  `HENRY_HEAD` (plain hat, beard `h`), plaid `r` (added to every `POWER_LOOK`) and a hammer (`G` head,
+  `g` handle) under the belt. Modern: `modernHero` with `henry` (plaid, beard, hammer, no bolt).
+- Princess Blyth hovers: in `step`, holding jump while falling sets `p.hovering` and a slow bob, up to
+  `HOVER` (180) frames per jump, refilled on landing; not underwater or while flying. Pose `hover`
+  (`BLYTH_HOVER` pixel art with a wide skirt; `poof` in `modernRoyal`); other players fall back to stand.
+- Hostage: `captive` is picked at random (mom or dad) in `setLevel`, so it stays put through retries and
+  the house room; `prisoner()` returns the other royal when Queen Mom or King Dadderoons plays. Asked
+  for by the user so the King is not only the hostage when Queen Mom plays.
+- Checks: all five suites, with new hover/Henry/hostage asserts in the player block (the hover one fails with
+  `HOVER=0`); Firefox lineup of Elley-Oh!, Henry and Blyth in every pose and power in all four styles.
+  Not hand-played.
+
 Claude follow-up 4 (2026-10-28, committed as `a0b1596`): players, difficulty, new items, touch pads.
 - Players: `styles.heroes` (elley, blyth, dad, mom). Pixel art uses shared letters (R main, B second, O shoes)
   so `POWER_LOOK` recolours any character; the royals are front-facing and their poses come from

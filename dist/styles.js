@@ -236,14 +236,40 @@ window.GameStyles=(()=>{
   '..RRRWBBBBWRRR..',
   '..RRRWWWWWWRRR..',
   '....OO....OO....'];
- const HEROES={elley:{small:SMALL,big:BIG},blyth:{small:frontPoses(BLYTH_HEAD,BLYTH_BODY),big:frontPoses(BLYTH_HEAD,tall(BLYTH_BODY))},mom:{small:frontPoses(MOM_HEAD,MOM_BODY),big:frontPoses(MOM_HEAD,tall(MOM_BODY))},dad:{small:frontPoses(DAD_HEAD,DAD_BODY),big:frontPoses(DAD_HEAD,tall(DAD_BODY))}};
+ // Henry the carpenter: plain yellow hard hat, brown beard, red plaid shirt (r stripes), jeans and a hammer (G head, g handle) hanging from his belt.
+ const HENRY_HEAD=[
+  '.....CCCCCC.....',
+  '....CCCCCCCC....',
+  '...CCCCcCCCCC...',
+  '..cccccccccccccc',
+  '....HHSSSKSS....',
+  '....HSSSSKSSS...',
+  '....HhhSSSSSSS..',
+  '.....hhhMMhhh...'];
+ const henryPose=(art,jump)=>{const head=jump?HENRY_HEAD.map((r,i)=>i<2?r.slice(0,13)+'SS'+r.slice(15):r.slice(0,14)+'R'+r.slice(15)):HENRY_HEAD,put=(r,x,c)=>x>=0&&x<16?r.slice(0,x)+c+r.slice(x+1):r;
+  const body=art.slice(8).map((r,y)=>[...r].map((c,x)=>c==='W'||(c==='R'&&(x+y)%3===0)?'r':c).join('')),belt=body.findIndex(r=>r.includes('T'));
+  if(belt>=0){const t=body[belt].indexOf('T');for(let i=0;i<3;i++)body[belt+1]=put(body[belt+1],t+i,'G');for(const d of [2,3])if(body[belt+d])body[belt+d]=put(body[belt+d],t+1,'g')}
+  return [...head,...body]};
+ const henrySet=set=>Object.fromEntries(Object.entries(set).map(([k,a])=>[k,henryPose(a,k==='jump')]));
+ // Princess Blyth hovers with her skirt poofed out wide, arms out and feet together.
+ const BLYTH_HOVER=[
+  '.....RRRRRR.....',
+  '...SSRRWWRRSS...',
+  '.....RRRRRR.....',
+  '....BBBBBBBB....',
+  '..BBBBBBBBBBBB..',
+  '.BBBBBBBBBBBBBB.',
+  'BBBBBBBBBBBBBBBB',
+  '.B.B.B.OO.B.B.B.'];
+ const HEROES={elley:{small:SMALL,big:BIG},henry:{small:henrySet(SMALL),big:henrySet(BIG)},blyth:{small:{...frontPoses(BLYTH_HEAD,BLYTH_BODY),hover:[...BLYTH_HEAD,...BLYTH_HOVER]},big:{...frontPoses(BLYTH_HEAD,tall(BLYTH_BODY)),hover:[...BLYTH_HEAD,...tall(BLYTH_HOVER)]}},mom:{small:frontPoses(MOM_HEAD,MOM_BODY),big:frontPoses(MOM_HEAD,tall(MOM_BODY))},dad:{small:frontPoses(DAD_HEAD,DAD_BODY),big:frontPoses(DAD_HEAD,tall(DAD_BODY))}};
  const LOOKS={
   elley:{C:'#f8c020',c:'#c88a10',Z:'#e05010',R:'#2a9ad0',W:'#ffe060',T:'#7a4a20',Y:'#f8d040',B:'#2c3e78',O:'#5a3418',H:'#6a3a1a',S:'#fcbc84',K:'#101010',M:'#c05040'},
+  henry:{C:'#f8c020',c:'#c88a10',R:'#c83a2a',r:'#7a1e18',T:'#7a4a20',Y:'#f8d040',B:'#3a68b8',O:'#6a3a18',H:'#6a3a1a',h:'#8a5028',S:'#fcbc84',K:'#101010',M:'#c05040',G:'#9aa2ae',g:'#a0682a'},
   blyth:{Y:'#f8d040',W:'#60d0f0',H:'#b0502a',S:'#fcc8a0',K:'#241a1a',M:'#f49aa8',m:'#c8405e',R:'#9a5ad8',B:'#c890f0',O:'#6a3aa0'},
   mom:{Y:'#f8c838',W:'#3a9ad9',H:'#7a4426',S:'#f6c99f',K:'#241a1a',M:'#f49aa8',m:'#c8405e',R:'#ef74b2',B:'#ffd0e6',O:'#a8326a'},
   dad:{Y:'#f8c838',W:'#ffffff',H:'#7a4a26',S:'#f6c99f',K:'#241a1a',m:'#c8405e',R:'#c02838',B:'#3a5ac8',O:'#4a2a1a'}};
- const POWER_LOOK={fire:{R:'#fffaf0',B:'#d83d26',O:'#743726'},ice:{R:'#87e4fa',B:'#f6fbff',O:'#267caa'},tanuki:{R:'#9b653b',B:'#d7a46a',O:'#5b3727'},burger:{R:'#e8a040',B:'#7a3e1c',O:'#4a2410'},sword:{R:'#c8d0e0',B:'#3a4a7a',O:'#3a3a48'}};
- const heroes=[{id:'elley',name:'Elley-Oh!',short:'Elley-Oh!'},{id:'blyth',name:'Princess Blyth',short:'Blyth'},{id:'dad',name:'King Dadderoons',short:'Dadderoons'},{id:'mom',name:'Queen Mom',short:'Queen Mom'}];
+ const POWER_LOOK={fire:{r:'#e8c8b8',R:'#fffaf0',B:'#d83d26',O:'#743726'},ice:{r:'#4aa8c8',R:'#87e4fa',B:'#f6fbff',O:'#267caa'},tanuki:{r:'#6a4026',R:'#9b653b',B:'#d7a46a',O:'#5b3727'},burger:{r:'#a86a20',R:'#e8a040',B:'#7a3e1c',O:'#4a2410'},sword:{r:'#8a96a8',R:'#c8d0e0',B:'#3a4a7a',O:'#3a3a48'}};
+ const heroes=[{id:'elley',name:'Elley-Oh!',short:'Elley-Oh!'},{id:'henry',name:'Henry the Carpenter',short:'Henry'},{id:'blyth',name:'Princess Blyth',short:'Blyth'},{id:'dad',name:'King Dadderoons',short:'Dadderoons'},{id:'mom',name:'Queen Mom',short:'Queen Mom'}];
  // Caramel chip critter: D chocolate edge, C caramel, c shine, W eyes, K pupils, F feet.
  const chipTop=[
   '.......DD.......',
@@ -667,11 +693,12 @@ window.GameStyles=(()=>{
  }
  const MODERN_POWER={fire:{main:'#fffaf0',second:'#d83d26',shoe:'#743726'},ice:{main:'#9fe7f6',second:'#f8fcff',shoe:'#387da5'},tanuki:{main:'#b47b4d',second:'#d5a16b',shoe:'#5a3727'},burger:{main:'#e8a040',second:'#7a3e1c',shoe:'#4a2410'},sword:{main:'#c8d0e0',second:'#3a4a7a',shoe:'#3a3a48'}};
  // Elley-Oh! the electrician in smooth shapes: yellow hard hat with a lightning bolt, blue work shirt, tool belt and navy trousers.
+ // Henry the carpenter shares the shapes: plain hard hat, beard, red plaid shirt, jeans and a hammer on his belt.
  function modernHero(ctx,x,y,s){
-  if(s.who&&s.who!=='elley'&&ROYAL[s.who]){modernRoyal(ctx,x,y,s);return}
+  if(ROYAL[s.who]){modernRoyal(ctx,x,y,s);return}
   const big=!!s.big,h=big?48:28,pose=s.pose||'stand',stride=pose==='walk1'?1:pose==='walk2'?-1:0,jump=pose==='jump';
   const leg=big?14:6,body=big?17:11,headY=-(leg+body+(big?9:8)),r=big?8.5:8,P=MODERN_POWER[s.power];
-  const shirt=P?.main||'#2a9ad0',pants=P?.second||'#2c3e78',shoes=P?.shoe||'#5a3418',hat='#f8c020';
+  const henry=s.who==='henry',shirt=P?.main||(henry?'#c83a2a':'#2a9ad0'),pants=P?.second||(henry?'#3a68b8':'#2c3e78'),shoes=P?.shoe||(henry?'#6a3a18':'#5a3418'),hat='#f8c020';
   ctx.save();ctx.translate(Math.round(x+11),Math.round(y+h));if(s.face<0)ctx.scale(-1,1);ctx.lineJoin='round';ctx.lineCap='round';
   const out='#2a1d1a';ctx.strokeStyle=out;ctx.lineWidth=1.6;
   if(s.power==='tanuki'){ctx.strokeStyle='#5a3727';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(-6,-leg-7);ctx.bezierCurveTo(-20,-leg-12,-21,-leg-30,-10,-leg-29);ctx.stroke();ctx.strokeStyle='#d5a16b';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-6,-leg-7);ctx.bezierCurveTo(-20,-leg-12,-21,-leg-30,-10,-leg-29);ctx.stroke();ctx.strokeStyle=out;ctx.lineWidth=1.6}
@@ -685,8 +712,9 @@ window.GameStyles=(()=>{
   ctx.beginPath();ctx.moveTo(-5,armY);ctx.lineTo(handBack[0],handBack[1]);ctx.lineWidth=5.5;ctx.strokeStyle=shirt;ctx.stroke();ctx.lineWidth=1.6;ctx.strokeStyle=out;
   ellipse(ctx,handBack[0],handBack[1],2.8,2.8,'#ffcf9e');ctx.stroke();
   roundRect(ctx,-8,-leg-body,16,body,5);ctx.fillStyle=shirt;ctx.fill();ctx.stroke();
-  const by=-leg-body+3;ctx.fillStyle='#ffe060';ctx.beginPath();ctx.moveTo(3,by);ctx.lineTo(0,by+4);ctx.lineTo(2,by+4);ctx.lineTo(1,by+8);ctx.lineTo(5,by+3);ctx.lineTo(3,by+3);ctx.closePath();ctx.fill();
-  rect(ctx,-8,-leg-3,16,3,'#7a4a20');rect(ctx,-1.5,-leg-3,3,3,'#f8d040');roundRect(ctx,-10,-leg-2,5,6,1);ctx.fillStyle='#9a6a36';ctx.fill();ctx.stroke();
+  const by=-leg-body+3;if(henry){ctx.save();roundRect(ctx,-8,-leg-body,16,body,5);ctx.clip();for(let i=-8;i<8;i+=4.5)rect(ctx,i,-leg-body,1.6,body,'#7a1e1888');for(let j=-leg-body+2;j<-leg;j+=4.5)rect(ctx,-8,j,16,1.6,'#7a1e1888');ctx.restore()}
+  else{ctx.fillStyle='#ffe060';ctx.beginPath();ctx.moveTo(3,by);ctx.lineTo(0,by+4);ctx.lineTo(2,by+4);ctx.lineTo(1,by+8);ctx.lineTo(5,by+3);ctx.lineTo(3,by+3);ctx.closePath();ctx.fill()}
+  rect(ctx,-8,-leg-3,16,3,'#7a4a20');rect(ctx,-1.5,-leg-3,3,3,'#f8d040');if(henry){rect(ctx,-6.5,-leg,2,big?9:7,'#a0682a');roundRect(ctx,-9.5,-leg-.5,8,3.5,1);ctx.fillStyle='#9aa2ae';ctx.fill();ctx.stroke()}else{roundRect(ctx,-10,-leg-2,5,6,1);ctx.fillStyle='#9a6a36';ctx.fill();ctx.stroke()}
   ctx.beginPath();ctx.moveTo(5,armY);ctx.lineTo(handFront[0],handFront[1]);ctx.lineWidth=5.5;ctx.strokeStyle=shirt;ctx.stroke();ctx.lineWidth=1.6;ctx.strokeStyle=out;
   ellipse(ctx,handFront[0],handFront[1],2.8,2.8,'#ffcf9e');ctx.stroke();
   // Head: hair, face, ear, eye, nose and smile, then the hard hat.
@@ -696,25 +724,27 @@ window.GameStyles=(()=>{
   ellipse(ctx,-2,headY+2,2,2.5,'#f4b47e');ctx.stroke();
   ellipse(ctx,4.5,headY-.5,1.3,2.3,'#1c1c2a');rect(ctx,4,headY-2.5,1,1,'#ffffff');
   ellipse(ctx,9,headY+2.5,2.6,2.2,'#ffbe86');ctx.stroke();
-  ctx.beginPath();ctx.arc(5,headY+4.2,2.4,.35,Math.PI-.7);ctx.strokeStyle='#a8443a';ctx.stroke();ctx.strokeStyle=out;
+  if(henry){ctx.beginPath();ctx.moveTo(-2,headY+1);ctx.quadraticCurveTo(-1,headY+r+2,5,headY+r+1.5);ctx.quadraticCurveTo(10,headY+r,10,headY+3.5);ctx.quadraticCurveTo(6,headY+6,-2,headY+1);ctx.fillStyle='#8a5028';ctx.fill();ctx.stroke()}
+  ctx.beginPath();ctx.arc(5,headY+4.2,2.4,.35,Math.PI-.7);ctx.strokeStyle=henry?'#f0c0a0':'#a8443a';ctx.stroke();ctx.strokeStyle=out;
   ctx.beginPath();ctx.ellipse(.5,headY-3,r+.8,r*.82,0,Math.PI,0);ctx.closePath();ctx.fillStyle=hat;ctx.fill();ctx.stroke();
   rect(ctx,-1,headY-3-r*.8,3,r*.8,'#ffe07a');
   ctx.beginPath();ctx.ellipse(2,headY-2.5,r+4.5,1.9,0,0,Math.PI*2);ctx.fillStyle='#d89a10';ctx.fill();ctx.stroke();
-  ctx.fillStyle='#e05010';ctx.beginPath();ctx.moveTo(5,headY-9);ctx.lineTo(3,headY-6);ctx.lineTo(5,headY-6);ctx.lineTo(4,headY-3.5);ctx.lineTo(7,headY-7);ctx.lineTo(5.5,headY-7);ctx.closePath();ctx.fill();
+  if(!henry){ctx.fillStyle='#e05010';ctx.beginPath();ctx.moveTo(5,headY-9);ctx.lineTo(3,headY-6);ctx.lineTo(5,headY-6);ctx.lineTo(4,headY-3.5);ctx.lineTo(7,headY-7);ctx.lineTo(5.5,headY-7);ctx.closePath();ctx.fill()}
   if(s.power==='tanuki'){ellipse(ctx,-6,headY-10,4.5,6,'#98623b');ellipse(ctx,5,headY-10,4.5,6,'#98623b');ellipse(ctx,-6,headY-10,2,3,'#d5a16b');ellipse(ctx,5,headY-10,2,3,'#d5a16b')}
   ctx.restore();
  }
  // The royals in smooth shapes: Princess Blyth, Queen Mom and King Dadderoons. Drawn as tall as Big Elley-Oh! and scaled down when small.
  const ROYAL={blyth:{hair:'#b0502a',main:'#9a5ad8',second:'#c890f0',shoe:'#6a3aa0',crown:'tiara',gem:'#60d0f0'},mom:{hair:'#7a4426',main:'#ef74b2',second:'#ffd0e6',shoe:'#a8326a',crown:'crown',gem:'#3a9ad9'},dad:{hair:'#7a4a26',main:'#c02838',second:'#3a5ac8',shoe:'#4a2a1a',crown:'king',gem:'#e8392c',beard:true}};
  function modernRoyal(ctx,x,y,s){
-  const L={...ROYAL[s.who],...MODERN_POWER[s.power]},big=!!s.big,h=big?48:28,k=big?1:.6,pose=s.pose||'stand',jump=pose==='jump',step=pose==='walk1'?1:pose==='walk2'?-1:0,skin='#f6c99f',out=L.beard?'#3a1a14':'#4a1f38';
+  const L={...ROYAL[s.who],...MODERN_POWER[s.power]},big=!!s.big,h=big?48:28,k=big?1:.6,pose=s.pose||'stand',jump=pose==='jump',poof=pose==='hover',step=pose==='walk1'?1:pose==='walk2'?-1:0,skin='#f6c99f',out=L.beard?'#3a1a14':'#4a1f38';
   ctx.save();ctx.translate(Math.round(x+11),Math.round(y+h));ctx.scale(s.face<0?-k:k,k);ctx.lineJoin='round';ctx.lineCap='round';ctx.lineWidth=1.6;ctx.strokeStyle=out;
   if(s.power==='tanuki'){ctx.strokeStyle='#5a3727';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(-8,-10);ctx.bezierCurveTo(-22,-14,-23,-32,-12,-31);ctx.stroke();ctx.strokeStyle='#d5a16b';ctx.lineWidth=5;ctx.stroke();ctx.strokeStyle=out;ctx.lineWidth=1.6}
-  for(const side of [-1,1]){ellipse(ctx,side*5+(jump?side*2:-step*side*2),-2,4.5,2.6,L.shoe);ctx.stroke()}
+  for(const side of [-1,1]){ellipse(ctx,side*(poof?2.5:5)+(jump?side*2:-step*side*2),-2,4.5,2.6,L.shoe);ctx.stroke()}
   if(!L.beard)ellipse(ctx,0,-31,11,14,L.hair);
   if(L.beard){roundRect(ctx,-12,-27,24,25,5);ctx.fillStyle=L.main;ctx.fill();ctx.stroke();rect(ctx,-5,-26,10,23,L.second);rect(ctx,-7,-26,3,23,'#ffffff');rect(ctx,4,-26,3,23,'#ffffff');rect(ctx,-12,-6,24,3,'#ffffff');rect(ctx,-5,-15,10,3,'#f8c838')}
+  else if(poof){ctx.beginPath();ctx.moveTo(-7,-25);ctx.lineTo(7,-25);ctx.quadraticCurveTo(22,-16,21,-7);for(let i=0;i<6;i++){const a=21-i*7;ctx.quadraticCurveTo(a-3.5,-1,a-7,-7)}ctx.quadraticCurveTo(-22,-16,-7,-25);ctx.closePath();ctx.fillStyle=L.main;ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(-18,-10);ctx.quadraticCurveTo(0,-5,18,-10);ctx.strokeStyle=L.second;ctx.lineWidth=2.5;ctx.stroke();ctx.strokeStyle=out;ctx.lineWidth=1.6;ellipse(ctx,0,-25,4,2.2,'#ffffff')}
   else{ctx.beginPath();ctx.moveTo(-7,-25);ctx.lineTo(7,-25);ctx.lineTo(14+step,-4);ctx.quadraticCurveTo(0,0,-14+step,-4);ctx.closePath();ctx.fillStyle=L.main;ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(-13+step,-7);ctx.quadraticCurveTo(0,-3,13+step,-7);ctx.strokeStyle=L.second;ctx.lineWidth=2.5;ctx.stroke();ctx.strokeStyle=out;ctx.lineWidth=1.6;ellipse(ctx,0,-25,4,2.2,'#ffffff')}
-  for(const side of [-1,1]){const hx=jump?side*13:side*(12+step),hy=jump?-44:-13;ctx.beginPath();ctx.moveTo(side*8,-23);ctx.lineTo(hx,hy);ctx.lineWidth=5;ctx.strokeStyle=L.beard?L.main:L.second;ctx.stroke();ctx.lineWidth=1.6;ctx.strokeStyle=out;ellipse(ctx,hx,hy,2.6,2.6,skin);ctx.stroke()}
+  for(const side of [-1,1]){const hx=jump?side*13:poof?side*17:side*(12+step),hy=jump?-44:poof?-24:-13;ctx.beginPath();ctx.moveTo(side*8,-23);ctx.lineTo(hx,hy);ctx.lineWidth=5;ctx.strokeStyle=L.beard?L.main:L.second;ctx.stroke();ctx.lineWidth=1.6;ctx.strokeStyle=out;ellipse(ctx,hx,hy,2.6,2.6,skin);ctx.stroke()}
   ctx.beginPath();ctx.ellipse(0,-35,8,9,0,0,Math.PI*2);ctx.fillStyle=skin;ctx.fill();ctx.stroke();
   ellipse(ctx,0,-42,9,4,L.hair);
   if(L.crown==='tiara')for(const side of [-1,1])ellipse(ctx,side*11,-32,3.5,5.5,L.hair);
