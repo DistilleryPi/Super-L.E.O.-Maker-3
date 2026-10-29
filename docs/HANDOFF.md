@@ -64,6 +64,10 @@ Claude follow-up 4 (2026-10-28, committed as `a0b1596`): players, difficulty, ne
   the iPad positions are fixed pixels. `@media(pointer:coarse) and (max-width:600px)` sizes the pads
   with `vw` (`--aw`, `--sw`, `--jw`) and moves ▼ above ◀ ▶. Checked in Firefox frames at 390×844 and
   320×568 (no overlaps); not tested on a real phone.
+- Landscape phones (after `286c91d`): the user's screenshot showed the pads covering the lower third
+  of the course. `@media(pointer:coarse) and (max-height:500px)` makes them 60 px tall, 6 px from the
+  bottom edge (over the ground rows) and more transparent, with a smaller Pause. Checked in Firefox
+  frames at 844×390 and 667×375; the portrait and iPad layouts are unchanged.
 
 Claude follow-up 3 (2026-10-28, uncommitted, on top of `f144b97`): iPad / Home Screen app.
 - Touch buttons (`[data-key]`) no longer start an iOS text selection, which cancelled the
