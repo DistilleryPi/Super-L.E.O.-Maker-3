@@ -4,6 +4,10 @@ Read `docs/HANDOFF.md` before changing code. It records the shared development s
 open pull requests, checks performed and next priorities. Chat history and ignored local
 files are not shared state. Update the handoff when completing work.
 
+## Working style
+
+- Be concise.
+
 ## Project
 
 - A family platformer (Elley-Oh!), level builder, World Maker and sound studio. The game
